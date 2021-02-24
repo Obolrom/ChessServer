@@ -7,8 +7,6 @@ import com.company.romeo.engine.exceptions.*;
 import com.company.romeo.engine.misc.Color;
 import com.company.romeo.engine.misc.Verticals;
 import com.company.romeo.engine.movements.*;
-import com.company.romeo.server.engine.exceptions.*;
-import com.company.romeo.server.engine.movements.*;
 
 public class King extends ChessPiece {
 

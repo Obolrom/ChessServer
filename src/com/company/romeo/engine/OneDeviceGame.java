@@ -8,9 +8,6 @@ import com.company.romeo.engine.figures.*;
 import com.company.romeo.engine.misc.Color;
 import com.company.romeo.engine.misc.Verticals;
 import com.company.romeo.engine.movements.*;
-import com.company.romeo.server.engine.exceptions.*;
-import com.company.romeo.server.engine.figures.*;
-import com.company.romeo.server.engine.movements.*;
 
 import java.util.LinkedList;
 import java.util.List;

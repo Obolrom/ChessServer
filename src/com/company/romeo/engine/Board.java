@@ -5,7 +5,7 @@ import com.company.romeo.engine.misc.Verticals;
 import com.company.romeo.engine.figures.ChessPiece;
 import com.company.romeo.engine.figures.Piece;
 import com.company.romeo.engine.movements.*;
-import com.company.romeo.server.engine.movements.*;
+import com.company.romeo.engine.movements.*;
 
 import java.util.LinkedList;
 import java.util.List;

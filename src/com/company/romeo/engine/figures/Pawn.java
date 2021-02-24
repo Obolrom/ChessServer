@@ -7,8 +7,6 @@ import com.company.romeo.engine.movements.Movable;
 import com.company.romeo.engine.movements.MovementHistory;
 import com.company.romeo.engine.movements.Position;
 import com.company.romeo.engine.EndGameChecker;
-import com.company.romeo.server.engine.exceptions.*;
-import com.company.romeo.server.engine.movements.*;
 
 public class Pawn extends ChessPiece {
 

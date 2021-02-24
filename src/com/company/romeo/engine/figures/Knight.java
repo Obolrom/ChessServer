@@ -8,7 +8,6 @@ import com.company.romeo.engine.movements.Movable;
 import com.company.romeo.engine.movements.MovementHistory;
 import com.company.romeo.engine.movements.Position;
 import com.company.romeo.engine.EndGameChecker;
-import com.company.romeo.server.engine.exceptions.*;
 
 public class Knight extends ChessPiece {
 
