@@ -1,6 +1,5 @@
 package com.company.romeo.engine;
 
-
 import com.company.romeo.engine.automata.Player;
 import com.company.romeo.engine.automata.WhitePlayer;
 import com.company.romeo.engine.exceptions.*;
