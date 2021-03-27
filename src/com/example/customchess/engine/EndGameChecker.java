@@ -1,38 +1,33 @@
 package com.example.customchess.engine;
 
-
 import com.example.customchess.engine.exceptions.ChessException;
+import com.example.customchess.engine.figures.King;
 import com.example.customchess.engine.figures.Knight;
 import com.example.customchess.engine.figures.Piece;
 import com.example.customchess.engine.misc.Color;
 import com.example.customchess.engine.movements.Movement;
 import com.example.customchess.engine.movements.MovementHistory;
 import com.example.customchess.engine.movements.Position;
-import com.example.customchess.engine.figures.King;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 public class EndGameChecker {
-
     private final Board board;
     private List<Piece> whiteTeam;
     private List<Piece> blackTeam;
 
-    public EndGameChecker(Board board,
-                          List<Piece> whiteTeam,
-                          List<Piece> blackTeam) {
+    public EndGameChecker(Board board) {
         this.board = board;
-        this.whiteTeam = whiteTeam;
-        this.blackTeam = blackTeam;
     }
 
     public boolean isCheckMate(Color teamColor) {
+        updateTeams();
         List<Piece> enemyTeam = getTeamBy(Color.getOppositeColor(teamColor));
         Piece king = getKingBy(teamColor);
         assert king != null;
-        Position kingPos = king.getCurrentPosition();
+        Position kingPos = board.getPositionOfPiece(king);
         boolean answer = false;
         List<Position> attackingFigures = getAttackingFigures(enemyTeam, kingPos);
         int attackingFiguresAmount = attackingFigures.size();
@@ -64,11 +59,12 @@ public class EndGameChecker {
     }
 
     private List<Position> getAttackingFigures(List<Piece> enemyTeam, Position attackedPosition) {
+        updateTeams();
         List<Position> attackingFigures = new LinkedList<>();
         Position currentPosition;
 
         for (Piece figure : enemyTeam) {
-            currentPosition = figure.getCurrentPosition();
+            currentPosition = board.getPositionOfPiece(figure);
 
             try {
                 if (figure.isFightTrajectoryValid(new Movement(currentPosition, attackedPosition))
@@ -84,10 +80,11 @@ public class EndGameChecker {
     }
 
     private Piece getKingBy(Color teamColor) {
+        updateTeams();
         List<Piece> team = getTeamBy(teamColor);
 
         for (Piece currentPiece : team) {
-            if ( currentPiece instanceof King) {
+            if ( currentPiece instanceof King ) {
                 return currentPiece;
             }
         }
@@ -95,18 +92,20 @@ public class EndGameChecker {
     }
 
     public boolean isKingUnderAttack(Color teamColor) {
+        updateTeams();
         Piece king = getKingBy(teamColor);
         assert king != null;
-        return isPositionUnderAttackByEnemyTeam(teamColor, king.getCurrentPosition());
+        return isPositionUnderAttackByEnemyTeam(teamColor, board.getPositionOfPiece(king));
     }
 
     public boolean isPositionUnderAttackByEnemyTeam(Color teamColor, Position position) {
+        updateTeams();
         List<Piece> enemyTeam = getTeamBy( Color.getOppositeColor(teamColor) );
         Position currentPosition;
         boolean answer = false;
 
         for (Piece figure : enemyTeam) {
-            currentPosition = figure.getCurrentPosition();
+            currentPosition = board.getPositionOfPiece(figure);
 
             try {
                 assert currentPosition != null;
@@ -127,6 +126,7 @@ public class EndGameChecker {
     }
 
     public boolean isCageToMoveKingAway(List<Position> emptyCagesAroundKing, Position kingPosition) {
+        updateTeams();
         MovementHistory backUpMove;
         Movement currentMovement;
         Piece king = board.findBy(kingPosition);
@@ -156,7 +156,10 @@ public class EndGameChecker {
         return answer;
     }
 
-    public boolean isPieceToCoverKingFromCheck(Color kingColor, Position kingPosition, Position attackingPiece) {
+    public boolean isPieceToCoverKingFromCheck(Color kingColor,
+                                               Position kingPosition,
+                                               Position attackingPiece) {
+        updateTeams();
         List<Piece> ourTeam = getTeamBy(kingColor);
         MovementHistory backUpMove;
         Movement currentMovement;
@@ -165,7 +168,7 @@ public class EndGameChecker {
         LinkedList<Position> distance = Movement.getPositionsOnDistance(new Movement(kingPosition, attackingPiece));
 
         for (Piece piece : ourTeam) {
-            currentPosition = piece.getCurrentPosition();
+            currentPosition = board.getPositionOfPiece(piece);
             // cover attacking figure case
 
             for (Position cage : distance) {
@@ -194,6 +197,7 @@ public class EndGameChecker {
     }
 
     public boolean isFigureToBeatAttackingPiece(Color kingColor, Position attackingPiece) {
+        updateTeams();
         List<Piece> ourTeam = getTeamBy(kingColor);
         List<Piece> enemyTeam = getTeamBy(Color.getOppositeColor(kingColor));
         MovementHistory backUpMove;
@@ -202,7 +206,7 @@ public class EndGameChecker {
         boolean answer = false;
 
         for (Piece piece : ourTeam) {
-            currentPosition = piece.getCurrentPosition();
+            currentPosition = board.getPositionOfPiece(piece);
             // beat attacking figure case
             try {
                 assert currentPosition != null;
@@ -213,16 +217,13 @@ public class EndGameChecker {
                     backUpMove = new MovementHistory(currentMovement, board.findBy(currentPosition), board.findBy(attackingPiece));
                     enemyTeam.remove(board.findBy(attackingPiece));
                     board.beatFigure(currentPosition, attackingPiece);
-                    piece.setPosition(attackingPiece);
                     if ( ! isKingUnderAttack(kingColor)) {
                         answer = true;
                         board.restorePreviousTurn(backUpMove);
-                        piece.setPosition(currentPosition);
                         enemyTeam.add(board.findBy(attackingPiece));
                         break;
                     }
                     board.restorePreviousTurn(backUpMove);
-                    piece.setPosition(currentPosition);
                     enemyTeam.add(board.findBy(attackingPiece));
                 }
             } catch (ChessException e) {
@@ -233,13 +234,21 @@ public class EndGameChecker {
         return answer;
     }
 
+    // +
+    public void updateTeams() {
+        whiteTeam = board.getTeamBy(Color.White);
+        blackTeam = board.getTeamBy(Color.Black);
+    }
+
+    // +
     public List<Piece> getTeamBy(Color teamColor) {
+        updateTeams();
         return teamColor.equals(Color.White) ? whiteTeam : blackTeam;
     }
 
-    // todo move these 2 methods to DrawChecker class,
-    //  because it will be correct,
-    //  and now it works incorrect I assume
+//     todo move these 2 methods to DrawChecker class,
+//      because it will be correct,
+//      and now it works incorrect I assume
     public boolean checkForDraw(Color teamColor) {
         List<Piece> team = getTeamBy(teamColor);
         int figuresCannotMove = 0;
@@ -258,7 +267,7 @@ public class EndGameChecker {
         int canMove = 0;
         Piece king = getKingBy(piece.getColor());
         assert king != null;
-        Position currentPosition = piece.getCurrentPosition();
+        Position currentPosition = board.getPositionOfPiece(piece);
         List<Position> cagesAround = piece instanceof Knight ?
                 currentPosition.getPositionsAroundKnight() :
                 currentPosition.getPositionsAround();
@@ -292,7 +301,6 @@ public class EndGameChecker {
 
         return canMove > 0;
     }
-    // --------------
 
     public List<Position> getEmptyPositionsAround(Position position) {
         List<Position> cagesAround = position.getPositionsAround();

@@ -1,17 +1,16 @@
 package com.example.customchess.engine.movements;
 
-
 import com.example.customchess.engine.misc.Color;
 import com.example.customchess.engine.misc.Verticals;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BoardPosition implements Position, Serializable {
 
-    private Verticals vertical;
-    private String    horizontal;
+public class BoardPosition implements Position {
+    private static final long serialVersionUID = 76767676;
+    private final Verticals vertical;
+    private final String    horizontal;
 
     public BoardPosition(Verticals vertical, String horizontal) {
         this.vertical = vertical;

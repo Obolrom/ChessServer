@@ -1,9 +1,7 @@
 package com.example.customchess.networking;
 
-import com.example.customchess.engine.misc.Pieces;
 import com.example.customchess.engine.movements.Movable;
 
-import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
 

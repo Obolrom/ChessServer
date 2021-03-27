@@ -1,18 +1,21 @@
 package com.example.customchess.engine.figures;
 
 import com.example.customchess.engine.Board;
+import com.example.customchess.engine.EndGameChecker;
+import com.example.customchess.engine.movements.MovementHistory;
+import com.example.customchess.engine.exceptions.BeatFigureException;
+import com.example.customchess.engine.exceptions.ChessException;
+import com.example.customchess.engine.exceptions.InvalidMoveException;
+import com.example.customchess.engine.exceptions.MoveOnEmptyCageException;
+import com.example.customchess.engine.exceptions.OneTeamPiecesSelectedException;
 import com.example.customchess.engine.misc.Color;
 import com.example.customchess.engine.movements.Movable;
-import com.example.customchess.engine.movements.MovementHistory;
 import com.example.customchess.engine.movements.Position;
-import com.example.customchess.engine.EndGameChecker;
-import com.example.customchess.engine.exceptions.*;
-
 
 public class Queen extends ChessPiece {
 
-    public Queen(Color color, Position position) {
-        super(position, 9.0, color);
+    public Queen(Color color) {
+        super(9.0, color);
     }
 
     @Override

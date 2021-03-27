@@ -1,17 +1,26 @@
 package com.example.customchess.engine.figures;
 
-
 import com.example.customchess.engine.Board;
 import com.example.customchess.engine.EndGameChecker;
+import com.example.customchess.engine.movements.MovementHistory;
+import com.example.customchess.engine.exceptions.BeatFigureException;
+import com.example.customchess.engine.exceptions.CastlingException;
+import com.example.customchess.engine.exceptions.CheckKingException;
+import com.example.customchess.engine.exceptions.ChessException;
+import com.example.customchess.engine.exceptions.InvalidMoveException;
+import com.example.customchess.engine.exceptions.MoveOnEmptyCageException;
+import com.example.customchess.engine.exceptions.OneTeamPiecesSelectedException;
 import com.example.customchess.engine.misc.Color;
 import com.example.customchess.engine.misc.Verticals;
-import com.example.customchess.engine.exceptions.*;
-import com.example.customchess.engine.movements.*;
+import com.example.customchess.engine.movements.BoardPosition;
+import com.example.customchess.engine.movements.Movable;
+import com.example.customchess.engine.movements.Movement;
+import com.example.customchess.engine.movements.Position;
 
 public class King extends ChessPiece {
 
-    public King(Color color, Position position) {
-        super(position, 0.0, color);
+    public King(Color color) {
+        super(0.0, color);
     }
 
     @Override

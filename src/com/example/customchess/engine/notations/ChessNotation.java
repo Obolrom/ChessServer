@@ -1,6 +1,5 @@
 package com.example.customchess.engine.notations;
 
-
 import com.example.customchess.engine.figures.Piece;
 import com.example.customchess.engine.movements.Movable;
 

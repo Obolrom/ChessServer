@@ -1,13 +1,20 @@
 package com.example.customchess.engine;
 
+
+import com.example.customchess.engine.figures.*;
 import com.example.customchess.engine.misc.Color;
 import com.example.customchess.engine.misc.Verticals;
-import com.example.customchess.engine.figures.ChessPiece;
-import com.example.customchess.engine.figures.Piece;
-import com.example.customchess.engine.movements.*;
+import com.example.customchess.engine.movements.BoardPosition;
+import com.example.customchess.engine.movements.Movable;
+import com.example.customchess.engine.movements.Movement;
+import com.example.customchess.engine.movements.MovementHistory;
+import com.example.customchess.engine.movements.Position;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 
 public class Board {
 
@@ -17,10 +24,43 @@ public class Board {
         this.matrix = matrix;
     }
 
-    public Board(List<Piece> blackTeam, List<Piece> whiteTeam) {
+    public Board(Map<Position, Piece> blackTeam, Map<Position, Piece> whiteTeam) {
         matrix = new ChessPiece[8][8];
         placeTeam(whiteTeam);
         placeTeam(blackTeam);
+    }
+
+    public Position getPositionOfPiece(Piece piece) {
+        Piece currentPiece;
+        Position currentPosition;
+        Verticals[] verticals = Verticals.values();
+        for (Verticals vertical : verticals) {
+            for (int horizontal = 1; horizontal < 9; horizontal++) {
+                currentPosition = new BoardPosition(vertical, horizontal);
+                currentPiece = findBy(currentPosition);
+                if ( ! isCageEmpty(currentPiece) && currentPiece == piece ) {
+                    return currentPosition;
+                }
+            }
+        }
+        return null;
+    }
+
+    public List<Piece> getTeamBy(Color teamColor) {
+        List<Piece> team = new LinkedList<>();
+        Piece currentPiece;
+        Position currentPosition;
+        Verticals[] verticals = Verticals.values();
+        for (Verticals vertical : verticals) {
+            for (int horizontal = 1; horizontal < 9; horizontal++) {
+                currentPosition = new BoardPosition(vertical, horizontal);
+                currentPiece = findBy(currentPosition);
+                if ( ! isCageEmpty(currentPiece) && currentPiece.getColor().equals(teamColor)  ) {
+                    team.add(currentPiece);
+                }
+            }
+        }
+        return team;
     }
 
     public void castling(Position start, Position destination) {
@@ -38,8 +78,6 @@ public class Board {
             oldRookPlace = new BoardPosition(Verticals.a, horizontal);
             newRookPlace = new BoardPosition(startVertical + 1, horizontal);
         }
-        findBy(oldRookPlace).setPosition(newRookPlace);
-        findBy(start).setPosition(destination);
         put(destination, findBy(start));
         put(newRookPlace, findBy(oldRookPlace));
         hide(oldRookPlace);
@@ -56,15 +94,12 @@ public class Board {
             oldAttackedPawn = new BoardPosition(destination.getVertical().ordinal(),
                     destination.getHorizontal() + 1);
         }
-        findBy(start).setPosition(destination);
         put(destination, findBy(start));
         hide(start);
         hide(oldAttackedPawn);
     }
 
     public void beatFigure(Position start, Position destination) {
-        Piece startPiece = findBy(start);
-        startPiece.setPosition(destination);
         put(destination, findBy(start));
         hide(start);
     }
@@ -83,7 +118,6 @@ public class Board {
     public void swapFigures(Position start, Position destination) {
         Piece startFigure = findBy(start);
         Piece destinationFigure = findBy(destination);
-        startFigure.setPosition(destination);
 
         put(start, destinationFigure);
         put(destination, startFigure);
@@ -105,18 +139,9 @@ public class Board {
     public void restorePreviousTurn(MovementHistory history) {
         Position start = history.movement.getStart();
         Position destination = history.movement.getDestination();
-        if ( findBy(destination) != null ) {
-            findBy(destination).setPosition(start);
-        }
-        if ( findBy(start) != null ) {
-            findBy(start).setPosition(destination);
-        }
+
         put(start, history.start);
         put(destination, history.destination);
-    }
-
-    public void restoreRemovedFigure(Piece piece) {
-        put(piece.getCurrentPosition(), piece);
     }
 
     public void promoteTo(Position position, Piece promotion) {
@@ -142,12 +167,12 @@ public class Board {
         }
     }
 
-    public void placeTeam(List<Piece> team) {
+    public void placeTeam(Map<Position, Piece> team) {
         Piece currentPiece;
-        for (int i = 0; i < team.size(); i++) {
-            currentPiece = team.get(i);
-            put(currentPiece.getCurrentPosition(), currentPiece);
+        Set<Position> keys = team.keySet();
+        for (Position position : keys) {
+            currentPiece = team.get(position);
+            put(position, currentPiece);
         }
     }
-
 }

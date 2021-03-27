@@ -1,13 +1,11 @@
 package com.example.customchess.engine.movements;
 
-import java.io.Serializable;
 import java.util.LinkedList;
 
-
-public class Movement implements Movable, Serializable {
-
-    private Position start;
-    private Position destination;
+public class Movement implements Movable {
+    private static final long serialVersionUID = 1010101;
+    private final Position start;
+    private final Position destination;
 
     public Movement(Position start, Position destination) {
         this.start = start;
@@ -24,7 +22,6 @@ public class Movement implements Movable, Serializable {
         return destination;
     }
 
-    // TODO: 29.01.21 try to refactor this piece of shit
     public static LinkedList<Position> getPositionsOnDistance(Movable movement) {
         Position start = movement.getStart();
         Position destination = movement.getDestination();
