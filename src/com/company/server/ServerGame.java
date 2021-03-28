@@ -38,29 +38,30 @@ public class ServerGame implements Callable<String> {
     public void process() {
         try {
             while (true) {
-                ChessNetPacket packet = null;
-                try {
-                    packet = (ChessNetPacket) whitePlayer.receive();
-                } catch (ClassNotFoundException | ClassCastException e) {
-                    e.printStackTrace();
-                }
-                System.out.println("[WHITE CLIENT] message: " + packet);
-
-                try {
-                    assert packet != null;
-                    game.tryToMakeMovement(packet.getMovement());
-                } catch (MoveOnEmptyCageException
-                        | BeatFigureException
-                        | CastlingException
-                        | PromotionException
-                        | PawnEnPassantException e) {
-                    packet.makeMovementLegal();
-                } catch (ChessException ignored) { }
-
-                whitePlayer.send(packet);
-                blackPlayer.send(packet);
+                Thread.sleep(100000);
+//                ChessNetPacket packet = null;
+//                try {
+//                    packet = (ChessNetPacket) whitePlayer.receive();
+//                } catch (ClassNotFoundException | ClassCastException e) {
+//                    e.printStackTrace();
+//                }
+//                System.out.println("[WHITE CLIENT] message: " + packet);
+//
+//                try {
+//                    assert packet != null;
+//                    game.tryToMakeMovement(packet.getMovement());
+//                } catch (MoveOnEmptyCageException
+//                        | BeatFigureException
+//                        | CastlingException
+//                        | PromotionException
+//                        | PawnEnPassantException e) {
+//                    packet.makeMovementLegal();
+//                } catch (ChessException ignored) { }
+//
+//                whitePlayer.send(packet);
+//                blackPlayer.send(packet);
             }
-        } catch (IOException e) {
+        } catch (/*IOException |*/ InterruptedException e) {
             e.printStackTrace();
         }
     }

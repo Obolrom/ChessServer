@@ -19,9 +19,11 @@ public class ClientDispatcher extends Thread {
     public void addClient(Socket client) {
         try {
             // TODO: 27.03.21 create client in other thread
-            Client gamer = new Client(client);
-            if (clients.push(gamer)) {
-                gamer.send(new Object());  // TODO: 27.03.21 send response packet
+            Client gamer = new Client(client, 500);
+            if ( ! clients.push(gamer)) {
+                System.out.println("fuck off " + gamer);
+                gamer.close();
+//                gamer.send(new Object());  // TODO: 27.03.21 send response packet
             }
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
@@ -34,13 +36,13 @@ public class ClientDispatcher extends Thread {
             try {
                 System.out.println("active clients thread waiting...");
 
-                // TODO create method for game creating
-                if (clients.isEmpty()) {
+                if ( ! clients.isAnyReadyPair()) {
                     synchronized (this) {
                         wait();
-                        System.out.println("active clients thread stopped waiting");
+                        System.out.println("active clients thread is running");
                     }
                 }
+                clients.removeAllInactiveClients();
                 createGames(clients.getReadyPairsForGame());
 
             } catch (InterruptedException e) {
@@ -54,6 +56,8 @@ public class ClientDispatcher extends Thread {
             if (pair.isReadyForGame()) {
                 FutureTask<String> game = new FutureTask<>(new ServerGame(pair));
                 pool.execute(game);
+                clients.remove(pair);
+                System.out.println("game created with [ID: " + pair.getGameId() + "]");
             }
         }
     }

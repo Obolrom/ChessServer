@@ -1,8 +1,8 @@
 package com.company.server;
 
 import com.example.customchess.engine.misc.Team;
-import com.example.customchess.networking.ChessNetPacket;
 import com.example.customchess.networking.ConnectionPacket;
+import com.example.customchess.networking.HeartBeatPacket;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -17,8 +17,9 @@ public class Client implements Closeable {
     public final Team team;
     public final int GAME_ID;
 
-    public Client(Socket socket) throws IOException, ClassNotFoundException {
+    public Client(Socket socket, int timeout) throws IOException, ClassNotFoundException {
         this.socket = socket;
+        socket.setSoTimeout(timeout);
         input = new ObjectInputStream(socket.getInputStream());
         output = new ObjectOutputStream(socket.getOutputStream());
         ConnectionPacket connection = (ConnectionPacket) input.readObject();
@@ -36,11 +37,17 @@ public class Client implements Closeable {
     }
 
     public boolean isActive() {
-        return socket != null && socket.isConnected();
+        boolean isActive = true;
+        try {
+            send(new HeartBeatPacket());
+            receive();
+        } catch (IOException | ClassNotFoundException e) {
+            isActive = false;
+        }
+        return socket != null && socket.isConnected() && isActive;
     }
 
-    public Object receive()
-            throws IOException, ClassNotFoundException {
+    public Object receive() throws IOException, ClassNotFoundException {
         return input.readObject();
     }
 
@@ -50,7 +57,11 @@ public class Client implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
-        socket.close();
+    public void close() {
+        try {
+            socket.close();
+        } catch (IOException e) {
+            System.out.println("[Client] " + socket.getLocalSocketAddress() + " is closed");
+        }
     }
 }
