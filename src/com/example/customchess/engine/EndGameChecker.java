@@ -9,11 +9,13 @@ import com.example.customchess.engine.movements.Movement;
 import com.example.customchess.engine.movements.MovementHistory;
 import com.example.customchess.engine.movements.Position;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public class EndGameChecker {
+public class EndGameChecker implements Serializable {
+    private static final long serialVersionUID = 912032947757584L;
     private final Board board;
     private List<Piece> whiteTeam;
     private List<Piece> blackTeam;
@@ -240,7 +242,6 @@ public class EndGameChecker {
         blackTeam = board.getTeamBy(Color.Black);
     }
 
-    // +
     public List<Piece> getTeamBy(Color teamColor) {
         updateTeams();
         return teamColor.equals(Color.White) ? whiteTeam : blackTeam;

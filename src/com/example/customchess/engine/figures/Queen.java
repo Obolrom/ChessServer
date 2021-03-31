@@ -13,6 +13,7 @@ import com.example.customchess.engine.movements.Movable;
 import com.example.customchess.engine.movements.Position;
 
 public class Queen extends ChessPiece {
+    private static final long serialVersionUID = 7435904L;
 
     public Queen(Color color) {
         super(9.0, color);

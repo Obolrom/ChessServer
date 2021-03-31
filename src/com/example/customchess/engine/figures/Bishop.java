@@ -13,6 +13,7 @@ import com.example.customchess.engine.movements.Movable;
 import com.example.customchess.engine.movements.Position;
 
 public class Bishop extends ChessPiece {
+    private static final long serialVersionUID = 49393275L;
 
     public Bishop(Color color) {
         super(3.5, color);

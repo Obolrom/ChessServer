@@ -13,6 +13,7 @@ import com.example.customchess.engine.movements.Movable;
 import com.example.customchess.engine.movements.Position;
 
 public class Knight extends ChessPiece {
+    private static final long serialVersionUID = 12302L;
 
     public Knight(Color color) {
         super( 3.0, color);

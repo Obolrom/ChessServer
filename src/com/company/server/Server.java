@@ -1,14 +1,19 @@
 package com.company.server;
 
+import com.example.customchess.engine.Game;
+import com.example.customchess.engine.OneDeviceGame;
+
+import java.io.*;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Server {
 
-    /**  Server strategy:<p><p>
+    /**  <strong>Server strategy:<p></strong>
      *
-     *  CONNECTION:
+     *  <strong>CONNECTION</strong>:
      *    RequestHandler accepts all the clients
      *    and push it to the collection, that is
      *    stored in ClientDispatcher <p>

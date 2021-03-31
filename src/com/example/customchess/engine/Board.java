@@ -10,15 +10,16 @@ import com.example.customchess.engine.movements.Movement;
 import com.example.customchess.engine.movements.MovementHistory;
 import com.example.customchess.engine.movements.Position;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 
-public class Board {
-
-    private Piece[][] matrix;
+public class Board implements Serializable {
+    private static final long serialVersionUID = 948367493275458482L;
+    private final Piece[][] matrix;
 
     public Board(Piece[][] matrix) {
         this.matrix = matrix;

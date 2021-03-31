@@ -8,7 +8,7 @@ import java.util.List;
 
 
 public class BoardPosition implements Position {
-    private static final long serialVersionUID = 76767676;
+    private static final long serialVersionUID = 76767676L;
     private final Verticals vertical;
     private final String    horizontal;
 

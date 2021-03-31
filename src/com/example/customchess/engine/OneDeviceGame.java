@@ -1,40 +1,18 @@
 package com.example.customchess.engine;
 
-import com.example.customchess.engine.automata.Player;
-import com.example.customchess.engine.automata.WhitePlayer;
-import com.example.customchess.engine.exceptions.BeatFigureException;
-import com.example.customchess.engine.exceptions.CastlingException;
-import com.example.customchess.engine.exceptions.CheckKingException;
-import com.example.customchess.engine.exceptions.CheckMateException;
-import com.example.customchess.engine.exceptions.ChessException;
-import com.example.customchess.engine.exceptions.DrawException;
-import com.example.customchess.engine.exceptions.FigureNotChosenException;
-import com.example.customchess.engine.exceptions.MoveOnEmptyCageException;
-import com.example.customchess.engine.exceptions.PawnEnPassantException;
-import com.example.customchess.engine.exceptions.PromotionException;
-import com.example.customchess.engine.figures.Bishop;
-import com.example.customchess.engine.figures.ChessPiece;
-import com.example.customchess.engine.figures.King;
-import com.example.customchess.engine.figures.Knight;
-import com.example.customchess.engine.figures.Pawn;
-import com.example.customchess.engine.figures.Piece;
-import com.example.customchess.engine.figures.Queen;
-import com.example.customchess.engine.figures.Rook;
+import com.example.customchess.engine.automata.*;
+import com.example.customchess.engine.exceptions.*;
+import com.example.customchess.engine.figures.*;
 import com.example.customchess.engine.misc.Color;
-import com.example.customchess.engine.movements.BoardPosition;
-import com.example.customchess.engine.movements.Movable;
-import com.example.customchess.engine.movements.MovementHistory;
-import com.example.customchess.engine.movements.Position;
+import com.example.customchess.engine.movements.*;
 
 import java.util.Hashtable;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
 
 public class OneDeviceGame implements Game {
-
+    private static final long serialVersionUID = 120548367493275L;
     private final Board board;
     private Player currentPlayer;
     private final Stack<MovementHistory> movementStack;
@@ -49,26 +27,6 @@ public class OneDeviceGame implements Game {
         initTeam(whiteTeam, Color.White);
         board = new Board(blackTeam, whiteTeam);
         gameAnalyser  = new EndGameChecker(board);
-    }
-
-    // for debug
-    public String getMovementsHistory() {
-        if ( movementStack.isEmpty() ) return "empty";
-        List<MovementHistory> correct = new LinkedList<>();
-
-        StringBuilder stringBuilder = new StringBuilder();
-        while ( ! movementStack.isEmpty()) {
-            correct.add(movementStack.pop());
-        }
-        int j = 1;
-        for (int i = correct.size() - 1; i >= 0; i--) {
-            stringBuilder.append(j++).append(". ").append(correct.get(i).movement).append("\n");
-        }
-        for (int i = correct.size() - 1; i >= 0; i--) {
-            movementStack.push(correct.get(i));
-        }
-
-        return stringBuilder.toString();
     }
 
     private void initTeam(Map<Position, Piece> team, Color color) {
@@ -102,14 +60,14 @@ public class OneDeviceGame implements Game {
     @Override
     public void checkForPat() throws DrawException {
         if (gameAnalyser.checkForDraw(currentPlayer.getColor())) {
-            throw new DrawException("Draw");
+            throw new DrawException();
         }
     }
 
     @Override
     public void checkForCheckMate() throws CheckMateException {
         if (gameAnalyser.isCheckMate(currentPlayer.getColor())) {
-            throw new CheckMateException("Mate on the board\n" + currentPlayer.getColor() + " is fucked");
+            throw new CheckMateException();
         }
     }
 

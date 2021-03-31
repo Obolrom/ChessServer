@@ -6,7 +6,9 @@ import com.example.customchess.engine.exceptions.ChessException;
 import com.example.customchess.engine.exceptions.DrawException;
 import com.example.customchess.engine.movements.Movable;
 
-public interface Game {
+import java.io.Serializable;
+
+public interface Game extends Serializable {
     void checkForPat() throws DrawException;
     void checkForCheckMate() throws CheckMateException;
     void promotion(String choice);

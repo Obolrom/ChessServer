@@ -15,6 +15,7 @@ import com.example.customchess.engine.movements.Movable;
 import com.example.customchess.engine.movements.Position;
 
 public class Pawn extends ChessPiece {
+    private static final long serialVersionUID = 1239568L;
 
     public Pawn(Color color) {
         super(1.0, color);

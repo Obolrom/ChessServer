@@ -13,6 +13,7 @@ import com.example.customchess.engine.movements.Movable;
 import com.example.customchess.engine.movements.Position;
 
 public class Rook extends ChessPiece {
+    private static final long serialVersionUID = 7384L;
 
     public Rook(Color color) {
         super(5.0, color);

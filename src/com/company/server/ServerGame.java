@@ -2,10 +2,9 @@ package com.company.server;
 
 import com.example.customchess.engine.Game;
 import com.example.customchess.engine.OneDeviceGame;
-import com.example.customchess.engine.exceptions.*;
-import com.example.customchess.networking.ChessNetPacket;
 
-import java.io.IOException;
+import java.net.Socket;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 
 public class ServerGame implements Callable<String> {
@@ -15,11 +14,11 @@ public class ServerGame implements Callable<String> {
     private final Client blackPlayer;
 
     public ServerGame(Pair gamers) {
-        this(gamers.getFirst(), gamers.getSecond());
+        this(gamers.getAndRemove(), gamers.getAndRemove());
     }
 
     public ServerGame(Client first, Client second) {
-        this.GAME_ID = first.GAME_ID;
+        this.GAME_ID = first.getGameID();
         if (first.isWhitePlayer()) {
             this.whitePlayer = first;
             this.blackPlayer = second;
@@ -37,8 +36,9 @@ public class ServerGame implements Callable<String> {
 
     public void process() {
         try {
-            while (true) {
-                Thread.sleep(100000);
+//            while (true) {
+                Thread.sleep(27 * 1000);
+                GameIDHolder.getInstance().remove(GAME_ID);
 //                ChessNetPacket packet = null;
 //                try {
 //                    packet = (ChessNetPacket) whitePlayer.receive();
@@ -60,7 +60,7 @@ public class ServerGame implements Callable<String> {
 //
 //                whitePlayer.send(packet);
 //                blackPlayer.send(packet);
-            }
+//            }
         } catch (/*IOException |*/ InterruptedException e) {
             e.printStackTrace();
         }

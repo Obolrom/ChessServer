@@ -18,6 +18,7 @@ import com.example.customchess.engine.movements.Movement;
 import com.example.customchess.engine.movements.Position;
 
 public class King extends ChessPiece {
+    private static final long serialVersionUID = 1205L;
 
     public King(Color color) {
         super(0.0, color);

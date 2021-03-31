@@ -7,7 +7,7 @@ import com.example.customchess.engine.misc.Color;
 
 
 public class BlackPlayer implements Player {
-
+    private static final long serialVersionUID = 430124839523L;
     private final Game game;
     private final Color         teamColor;
 

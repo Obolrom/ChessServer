@@ -8,8 +8,10 @@ import com.example.customchess.engine.misc.Color;
 import com.example.customchess.engine.movements.Movable;
 import com.example.customchess.engine.movements.Position;
 
+import java.io.Serializable;
 
-public interface Piece {
+
+public interface Piece extends Serializable {
     void tryToMove(Movable movement, Board board, EndGameChecker gameAnalyser, MovementHistory lastMovement) throws ChessException;
     boolean isTrajectoryValid(Movable movement) throws ChessException;
     boolean isFightTrajectoryValid(Movable movement) throws ChessException;
