@@ -3,6 +3,7 @@ package tests;
 import com.company.server.Client;
 import com.example.customchess.engine.misc.Team;
 import com.example.customchess.networking.ConnectionPacket;
+import com.example.customchess.networking.ConnectionType;
 
 import java.io.IOException;
 
@@ -53,5 +54,25 @@ public class ClientForTestReasons implements Client {
     @Override
     public int getGameID() {
         return GAME_ID;
+    }
+
+    @Override
+    public ConnectionPacket getConnectionPacket() {
+        return null;
+    }
+
+    @Override
+    public boolean isOpponent(Client other) {
+        return false;
+    }
+
+    @Override
+    public boolean isSameConnectionType(Client other) {
+        return false;
+    }
+
+    @Override
+    public boolean isReconnection() {
+        return false;
     }
 }

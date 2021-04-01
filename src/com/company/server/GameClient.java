@@ -15,28 +15,24 @@ public class GameClient implements Client, Closeable {
     private final Socket socket;
     private final ObjectInputStream input;
     private final ObjectOutputStream output;
-    private final ConnectionType connectionType;
-    private final Team team;
-    private final int GAME_ID;
+    private final ConnectionPacket connectionPacket;
 
     public GameClient(Socket socket, int timeout) throws IOException, ClassNotFoundException {
         this.socket = socket;
 //        socket.setSoTimeout(timeout);
         input = new ObjectInputStream(socket.getInputStream());
         output = new ObjectOutputStream(socket.getOutputStream());
-        ConnectionPacket connection = (ConnectionPacket) input.readObject();
-        connectionType = connection.type;
-        team = connection.team;
-        GAME_ID = connection.GAME_ID;
+        connectionPacket = (ConnectionPacket) input.readObject();
     }
 
+    @Override
     public boolean isReconnection() {
-        return connectionType.equals(ConnectionType.RECONNECT);
+        return connectionPacket.type.equals(ConnectionType.RECONNECT);
     }
 
     @Override
     public boolean isWhitePlayer() {
-        return team.equals(Team.White);
+        return connectionPacket.team.equals(Team.White);
     }
 
     @Override
@@ -53,12 +49,33 @@ public class GameClient implements Client, Closeable {
 
     @Override
     public Team getTeam() {
-        return team;
+        return connectionPacket.team;
     }
 
     @Override
     public int getGameID() {
-        return GAME_ID;
+        return connectionPacket.GAME_ID;
+    }
+
+    @Override
+    public ConnectionPacket getConnectionPacket() {
+        return connectionPacket;
+    }
+
+    @Override
+    public boolean isOpponent(Client other) {
+        if (other.getClass() != GameClient.class) return false;
+        GameClient enemy = (GameClient) other;
+        boolean gameIdEquality = connectionPacket.GAME_ID == enemy.connectionPacket.GAME_ID;
+        boolean teamEquality = connectionPacket.team.equals(enemy.connectionPacket.team);
+        boolean connectionTypeEquality = connectionPacket.type
+                .equals(enemy.connectionPacket.type);
+        return gameIdEquality && !teamEquality && connectionTypeEquality;
+    }
+
+    @Override
+    public boolean isSameConnectionType(Client other) {
+        return connectionPacket.type.equals(((GameClient) other).connectionPacket.type);
     }
 
     @Override

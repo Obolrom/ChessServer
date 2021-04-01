@@ -50,8 +50,7 @@ public class Pair {
     public boolean addClient(Client client) {
         if (clients.size() != 1) return false;
         Client first = clients.get(0);
-        if (first.getGameID() == client.getGameID() &&
-                !first.getTeam().equals(client.getTeam())) {
+        if (first.isOpponent(client)) {
             clients.add(client);
             return true;
         }

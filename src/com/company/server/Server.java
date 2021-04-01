@@ -3,6 +3,7 @@ package com.company.server;
 import com.example.customchess.engine.Game;
 import com.example.customchess.engine.OneDeviceGame;
 
+import javax.swing.*;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.*;
@@ -10,6 +11,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Server {
+    public static final String directoryPath = "/home/romix/JavaProg/ChessServer/src/";
+    public static final String savedGamesPath = "com/savedgames";
 
     /**  <strong>Server strategy:<p></strong>
      *

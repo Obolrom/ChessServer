@@ -22,6 +22,14 @@ public class ConnectionPacket implements Serializable {
         connected = false;
     }
 
+    public ConnectionPacket(ConnectionPacket old) {
+        this.time = old.time;
+        this.team = old.team;
+        this.GAME_ID = old.GAME_ID;
+        this.type = old.type;
+        this.connected = true;
+    }
+
     public boolean isConnectedToServer() {
         return connected;
     }

@@ -2,9 +2,12 @@ package com.company.server;
 
 import com.example.customchess.engine.Game;
 import com.example.customchess.engine.OneDeviceGame;
+import com.example.customchess.engine.exceptions.*;
+import com.example.customchess.networking.ChessNetMovementPacket;
+import com.example.customchess.networking.ChessNetPacket;
+import com.example.customchess.networking.ConnectionPacket;
 
-import java.net.Socket;
-import java.util.concurrent.BlockingQueue;
+import java.io.IOException;
 import java.util.concurrent.Callable;
 
 public class ServerGame implements Callable<String> {
@@ -27,49 +30,112 @@ public class ServerGame implements Callable<String> {
             this.blackPlayer = first;
         }
 
-        game = new OneDeviceGame();
+        if (whitePlayer.isReconnection() && blackPlayer.isReconnection()) {
+            System.out.println("DESERIALIZED GAME [" + GAME_ID + "]");
+            game = null;
+        } else {
+            game = new OneDeviceGame();
+        }
     }
 
-    public void start() {
-        process();
+    public boolean gameLoop() {
+        Object packet;
+        boolean isEndOfGame = false;
+        Client currentPlayer = whitePlayer;
+        Client opponentPlayer = blackPlayer;
+
+        while ( ! isEndOfGame ) {
+            try {
+                packet = currentPlayer.receive();
+                try {
+                    processPacket(currentPlayer, opponentPlayer, packet);
+
+                } catch (MoveOnEmptyCageException
+                        | BeatFigureException
+                        | CastlingException
+                        | PromotionException
+                        | PawnEnPassantException e) {
+                    currentPlayer = currentPlayer == whitePlayer ? blackPlayer : whitePlayer;
+                    opponentPlayer = opponentPlayer == whitePlayer ? blackPlayer : whitePlayer;
+                } catch (CheckMateException | DrawException e) {
+                    isEndOfGame = true;
+                } catch (ChessException ignored) { }
+
+            } catch (IOException | ClassNotFoundException e) {
+                System.err.println("fuck up");
+                break;
+            }
+        }
+
+        return isEndOfGame;
     }
 
-    public void process() {
+    private boolean sendResponseAboutGameStart() {
         try {
-//            while (true) {
-                Thread.sleep(27 * 1000);
-                GameIDHolder.getInstance().remove(GAME_ID);
-//                ChessNetPacket packet = null;
-//                try {
-//                    packet = (ChessNetPacket) whitePlayer.receive();
-//                } catch (ClassNotFoundException | ClassCastException e) {
-//                    e.printStackTrace();
-//                }
-//                System.out.println("[WHITE CLIENT] message: " + packet);
-//
-//                try {
-//                    assert packet != null;
-//                    game.tryToMakeMovement(packet.getMovement());
-//                } catch (MoveOnEmptyCageException
-//                        | BeatFigureException
-//                        | CastlingException
-//                        | PromotionException
-//                        | PawnEnPassantException e) {
-//                    packet.makeMovementLegal();
-//                } catch (ChessException ignored) { }
-//
-//                whitePlayer.send(packet);
-//                blackPlayer.send(packet);
-//            }
-        } catch (/*IOException |*/ InterruptedException e) {
+            whitePlayer.send(new ConnectionPacket(whitePlayer.getConnectionPacket()));
+            blackPlayer.send(new ConnectionPacket(blackPlayer.getConnectionPacket()));
+            return true;
+        } catch (IOException e) {
             e.printStackTrace();
         }
+        return false;
     }
 
     @Override
     public String call() throws Exception {
-        process();
+        if (sendResponseAboutGameStart()) {
+            System.out.println("game started successfully");
+        }
+        System.out.println("game loop end = " + gameLoop());
 
-        return null;
+        return "done";
+    }
+
+    private void processPacket(Client currentPlayer, Client opponentPlayer,
+                               Object packet) throws IOException, ChessException {
+        if (packet.getClass() != ChessNetMovementPacket.class) return;
+        ChessNetPacket chessPacket = (ChessNetPacket) packet;
+
+        try {
+            System.out.println(chessPacket);
+            processChessNetPacket(chessPacket);
+
+        } catch (MoveOnEmptyCageException
+                | BeatFigureException
+                | CastlingException
+                | PromotionException
+                | PawnEnPassantException
+                | CheckMateException
+                | DrawException e) {
+            currentPlayer.send(chessPacket);
+            opponentPlayer.send(chessPacket);
+            if ( ! currentPlayer.isActive() | ! opponentPlayer.isActive()) {
+                GameInstanceHandler.getInstance().saveGame(GAME_ID, game);
+                throw new IOException();
+            }
+            throw e;
+        } catch (ChessException e) {
+            currentPlayer.send(packet);
+        }
+    }
+
+    private void processChessNetPacket(ChessNetPacket chessPacket) throws ChessException {
+        try {
+            System.out.println("\t" + chessPacket.getMovement());
+            game.tryToMakeMovement(chessPacket.getMovement());
+
+        } catch (MoveOnEmptyCageException
+                | BeatFigureException
+                | CastlingException
+                | PromotionException
+                | PawnEnPassantException
+                | CheckMateException
+                | DrawException e) {
+            if (chessPacket.isPromotionPacket()) {
+                game.promotion(chessPacket.getPromotionPiece());
+            }
+            chessPacket.makeMovementLegal();
+            throw e;
+        }
     }
 }

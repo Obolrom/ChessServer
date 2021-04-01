@@ -23,15 +23,14 @@ public class ClientDispatcher extends Thread {
 
     private void addClient(Socket client) {
         try {
-            // TODO: 27.03.21 create client in other thread
             GameClient gamer = new GameClient(client, 500);
             if (gamer.isReconnection()) {
                 System.out.println("[RECONNECTION]");
             }
             if ( ! clients.push(gamer) | idHolder.hasSuchID(gamer.getGameID())) {
                 System.out.println("[deleted] " + gamer);
-                gamer.close();
 //                gamer.send(new Object());  // TODO: 27.03.21 send response packet
+                gamer.close();
             }
         } catch (IOException | ClassNotFoundException e) {
             System.out.println("[CLIENT] disconnected in time of connection");
