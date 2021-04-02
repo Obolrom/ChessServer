@@ -7,6 +7,7 @@ import com.example.customchess.engine.misc.Color;
 import com.example.customchess.networking.ChessNetMovementPacket;
 import com.example.customchess.networking.ChessNetPacket;
 import com.example.customchess.networking.ConnectionPacket;
+import com.example.customchess.networking.HeartBeatPacket;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;
@@ -130,6 +131,10 @@ public class ServerGame implements Callable<String> {
 
     private void processPacket(Client currentPlayer, Client opponentPlayer,
                                Object packet) throws IOException, ChessException {
+        Class<?> packetClass = packet.getClass();
+        if (packetClass == HeartBeatPacket.class) {
+            currentPlayer.send(new HeartBeatPacket());
+        }
         if (packet.getClass() != ChessNetMovementPacket.class) return;
         ChessNetPacket chessPacket = (ChessNetPacket) packet;
 
