@@ -10,7 +10,7 @@ public class GameInstanceHandler {
     private static GameInstanceHandler instance;
     private static final String fileNamePrefix = "game";
     private final String absoluteGameInstancesPath;
-    private Map<Integer, File> gameInstances;
+    private final Map<Integer, File> gameInstances;
 
     private GameInstanceHandler() {
         absoluteGameInstancesPath = Server.directoryPath + Server.savedGamesPath;
@@ -54,13 +54,19 @@ public class GameInstanceHandler {
         return true;
     }
 
+    public synchronized boolean hasGame(int gameId) {
+        return gameInstances.containsKey(gameId);
+    }
+
     public synchronized Game retrieve(int gameId) throws Exception {
         if ( ! gameInstances.containsKey(gameId))
             throw new Exception("Game with [id = " + gameId + "] doesn't exit");
         File file = gameInstances.remove(gameId);
         try (ObjectInputStream inputStream = new ObjectInputStream(
                 new FileInputStream(file))) {
-            return (Game) inputStream.readObject();
+            Game retrieved = (Game) inputStream.readObject();
+            if (file.delete()) System.out.println(file.getName() + " deleted");
+            return retrieved;
 
         } catch (IOException | ClassCastException e) {
             throw new Exception("Game with [id = " + gameId + "] doesn't exit");

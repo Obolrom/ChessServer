@@ -75,4 +75,9 @@ public class ClientForTestReasons implements Client {
     public boolean isReconnection() {
         return false;
     }
+
+    @Override
+    public void close() throws IOException {
+
+    }
 }

@@ -11,6 +11,7 @@ public class ClientDispatcher extends Thread {
     private final WaitingList clients;
     private final ThreadPoolExecutor pool;
     private final GameIDHolder idHolder;
+    private final GameInstanceHandler gameInstanceHandler;
     private final BlockingQueue<Socket> queue;
 
     public ClientDispatcher(BlockingQueue<Socket> queue, ThreadPoolExecutor pool) {
@@ -18,6 +19,7 @@ public class ClientDispatcher extends Thread {
         this.queue = queue;
         this.pool = pool;
         clients = new WaitingList();
+        gameInstanceHandler = GameInstanceHandler.getInstance();
         idHolder = GameIDHolder.getInstance();
     }
 
@@ -25,15 +27,42 @@ public class ClientDispatcher extends Thread {
         try {
             GameClient gamer = new GameClient(client, 500);
             if (gamer.isReconnection()) {
-                System.out.println("[RECONNECTION]");
+                reconnectionStrategy(gamer);
+            } else {
+                connectionStrategy(gamer);
             }
-            if ( ! clients.push(gamer) | idHolder.hasSuchID(gamer.getGameID())) {
+
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("[CLIENT] disconnected in time of connection");
+        }
+    }
+
+    protected void reconnectionStrategy(Client gamer) throws IOException {
+        int gameId = gamer.getGameID();
+        if (gameInstanceHandler.hasGame(gameId) && !idHolder.hasSuchID(gameId)) {
+            if ( !clients.push(gamer)) {
                 System.out.println("[deleted] " + gamer);
 //                gamer.send(new Object());  // TODO: 27.03.21 send response packet
                 gamer.close();
             }
-        } catch (IOException | ClassNotFoundException e) {
-            System.out.println("[CLIENT] disconnected in time of connection");
+        } else {
+            System.out.println("[deleted] " + gamer);
+//            gamer.send(new Object());  // TODO: 27.03.21 send response packet
+            gamer.close();
+        }
+    }
+
+    protected void connectionStrategy(Client gamer) throws IOException {
+        int gameId = gamer.getGameID();
+        if (idHolder.hasSuchID(gameId) | gameInstanceHandler.hasGame(gameId)) {
+            System.out.println("[deleted] " + gamer);
+//                gamer.send(new Object());  // TODO: 27.03.21 send response packet
+            gamer.close();
+        } else {
+            if ( ! clients.push(gamer)) {
+                System.out.println("[deleted] " + gamer);
+                gamer.close();
+            }
         }
     }
 
@@ -64,7 +93,8 @@ public class ClientDispatcher extends Thread {
                 // TODO: 30.03.21 response to clients
                 continue;
             }
-            if (pair.isReadyForGame() && idHolder.pushId(pair.getGameId())) {
+            if (pair.isReadyForGame()
+                    && idHolder.pushId(pair.getGameId())) {
                 FutureTask<String> game = new FutureTask<>(new ServerGame(pair));
                 pool.execute(game);
                 clients.remove(pair);

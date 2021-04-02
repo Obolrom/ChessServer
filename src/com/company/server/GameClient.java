@@ -5,13 +5,12 @@ import com.example.customchess.networking.ConnectionPacket;
 import com.example.customchess.networking.ConnectionType;
 import com.example.customchess.networking.HeartBeatPacket;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-public class GameClient implements Client, Closeable {
+public class GameClient implements Client {
     private final Socket socket;
     private final ObjectInputStream input;
     private final ObjectOutputStream output;

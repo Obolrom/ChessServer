@@ -22,7 +22,7 @@ public class GameIDHolder {
         return ! hasSuchID(id) && gameIDs.add(id);
     }
 
-    public synchronized void remove(int id) {
-        gameIDs.remove(id);
+    public synchronized boolean remove(int id) {
+        return gameIDs.remove(id);
     }
 }

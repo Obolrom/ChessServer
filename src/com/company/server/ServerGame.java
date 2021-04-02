@@ -3,6 +3,7 @@ package com.company.server;
 import com.example.customchess.engine.Game;
 import com.example.customchess.engine.OneDeviceGame;
 import com.example.customchess.engine.exceptions.*;
+import com.example.customchess.engine.misc.Color;
 import com.example.customchess.networking.ChessNetMovementPacket;
 import com.example.customchess.networking.ChessNetPacket;
 import com.example.customchess.networking.ConnectionPacket;
@@ -12,9 +13,10 @@ import java.util.concurrent.Callable;
 
 public class ServerGame implements Callable<String> {
     public final int GAME_ID;
-    private final Game game;
+    private Game game;
     private final Client whitePlayer;
     private final Client blackPlayer;
+    private final boolean restored;
 
     public ServerGame(Pair gamers) {
         this(gamers.getAndRemove(), gamers.getAndRemove());
@@ -32,8 +34,14 @@ public class ServerGame implements Callable<String> {
 
         if (whitePlayer.isReconnection() && blackPlayer.isReconnection()) {
             System.out.println("DESERIALIZED GAME [" + GAME_ID + "]");
-            game = null;
+            restored = true;
+            try {
+                game = GameInstanceHandler.getInstance().retrieve(GAME_ID);
+            } catch (Exception e) {
+                game = new OneDeviceGame();
+            }
         } else {
+            restored = false;
             game = new OneDeviceGame();
         }
     }
@@ -41,8 +49,21 @@ public class ServerGame implements Callable<String> {
     public boolean gameLoop() {
         Object packet;
         boolean isEndOfGame = false;
-        Client currentPlayer = whitePlayer;
-        Client opponentPlayer = blackPlayer;
+        Client currentPlayer;
+        Client opponentPlayer;
+
+        if (restored) {
+            if (game.getCurrentPlayerTeam().equals(Color.White)) {
+                currentPlayer = whitePlayer;
+                opponentPlayer = blackPlayer;
+            } else {
+                currentPlayer = blackPlayer;
+                opponentPlayer = whitePlayer;
+            }
+        } else {
+            currentPlayer = whitePlayer;
+            opponentPlayer = blackPlayer;
+        }
 
         while ( ! isEndOfGame ) {
             try {
@@ -62,7 +83,12 @@ public class ServerGame implements Callable<String> {
                 } catch (ChessException ignored) { }
 
             } catch (IOException | ClassNotFoundException e) {
-                System.err.println("fuck up");
+                closeClients();
+                System.err.println("game [id = " + GAME_ID + "] was broken");
+                game.rollBackLastMove();
+                if (GameInstanceHandler.getInstance().saveGame(GAME_ID, game)) {
+                    System.out.println("Game [id = " + GAME_ID + "] was saved");
+                }
                 break;
             }
         }
@@ -70,7 +96,7 @@ public class ServerGame implements Callable<String> {
         return isEndOfGame;
     }
 
-    private boolean sendResponseAboutGameStart() {
+    protected boolean sendResponseAboutGameStart() {
         try {
             whitePlayer.send(new ConnectionPacket(whitePlayer.getConnectionPacket()));
             blackPlayer.send(new ConnectionPacket(blackPlayer.getConnectionPacket()));
@@ -81,12 +107,23 @@ public class ServerGame implements Callable<String> {
         return false;
     }
 
+    protected void closeClients() {
+        try {
+            whitePlayer.close();
+            blackPlayer.close();
+        } catch (IOException e) {
+            System.out.println("clients disconnected");
+        }
+    }
+
     @Override
     public String call() throws Exception {
         if (sendResponseAboutGameStart()) {
             System.out.println("game started successfully");
         }
-        System.out.println("game loop end = " + gameLoop());
+        System.out.println("game loop ended [" + gameLoop() + "]");
+        System.out.println("game id " + GAME_ID + " deleted " +
+                GameIDHolder.getInstance().remove(GAME_ID));
 
         return "done";
     }
@@ -110,16 +147,16 @@ public class ServerGame implements Callable<String> {
             currentPlayer.send(chessPacket);
             opponentPlayer.send(chessPacket);
             if ( ! currentPlayer.isActive() | ! opponentPlayer.isActive()) {
-                GameInstanceHandler.getInstance().saveGame(GAME_ID, game);
                 throw new IOException();
             }
             throw e;
         } catch (ChessException e) {
+            // FIXME: 01.04.21 send kinda message packet about fuck up
             currentPlayer.send(packet);
         }
     }
 
-    private void processChessNetPacket(ChessNetPacket chessPacket) throws ChessException {
+    protected void processChessNetPacket(ChessNetPacket chessPacket) throws ChessException {
         try {
             System.out.println("\t" + chessPacket.getMovement());
             game.tryToMakeMovement(chessPacket.getMovement());

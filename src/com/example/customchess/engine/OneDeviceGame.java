@@ -49,11 +49,17 @@ public class OneDeviceGame implements Game {
         }
     }
 
+    @Override
     public void setCurrentPlayer(Player player) {
         currentPlayer = player;
     }
 
-    public MovementHistory getLastMovement() {
+    @Override
+    public Color getCurrentPlayerTeam() {
+        return currentPlayer.getColor();
+    }
+
+    private MovementHistory getLastMovement() {
         return ! movementStack.isEmpty() ? movementStack.peek() : null;
     }
 
@@ -68,6 +74,14 @@ public class OneDeviceGame implements Game {
     public void checkForCheckMate() throws CheckMateException {
         if (gameAnalyser.isCheckMate(currentPlayer.getColor())) {
             throw new CheckMateException();
+        }
+    }
+
+    @Override
+    public void rollBackLastMove() {
+        if ( ! movementStack.isEmpty()) {
+            currentPlayer.changePlayer();
+            board.restorePreviousTurn(movementStack.pop());
         }
     }
 

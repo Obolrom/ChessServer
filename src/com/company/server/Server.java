@@ -11,37 +11,37 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Server {
-    public static final String directoryPath = "/home/romix/JavaProg/ChessServer/src/";
+    public static final String directoryPath =
+            System.getProperty("user.dir") + "/src/";
     public static final String savedGamesPath = "com/savedgames";
+    public static final String usageGuide = "example of usage: <port> [pool size]";
 
     /**  <strong>Server strategy:<p></strong>
      *
      *  <strong>CONNECTION</strong>:
      *    RequestHandler accepts all the clients
      *    and push it to the collection, that is
-     *    stored in ClientDispatcher <p>
-     *    <p> 1) before pushing, check for
-     *           existing of pair with the same GAME_ID
-     *    <p> 2) check for existing of current game on server
-     *           with same ID or serialized IDs
+     *    stored in ClientDispatcher
      */
 
     public static void main(String[] args) {
-        if (args.length != 1) {
-            System.err.println("example of usage: <java> <path.Server> <port>");
+        if (args.length < 1 | args.length > 2) {
+            System.err.println(usageGuide);
             System.exit(1);
         }
 
         int port = 0;
+        int poolSize = 4;
         try {
             port = Integer.parseInt(args[0]);
+            poolSize = Integer.parseInt(args[1]);
         } catch (NumberFormatException e) {
-            System.err.println("invalid port format");
+            System.err.println("invalid argument format");
             System.exit(2);
-        }
+        } catch (ArrayIndexOutOfBoundsException ignored) { }
         System.out.println("[SERVER] has started [port:" + port +
                 "] [time: " + Calendar.getInstance().getTime() + "]");
 
-        new RequestHandler(port, 3).run();
+        new RequestHandler(port, poolSize).run();
     }
 }

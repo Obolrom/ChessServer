@@ -2,9 +2,10 @@ package com.example.customchess.engine.movements;
 
 import com.example.customchess.engine.figures.Piece;
 
-public class MovementHistory {
+import java.io.Serializable;
 
-    // that's just stupid DTO
+public class MovementHistory implements Serializable {
+    private static final long serialVersionUID = 120542434L;
     public final Movable movement;
     public final Piece start;
     public final Piece destination;
