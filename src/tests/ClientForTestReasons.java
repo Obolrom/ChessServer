@@ -67,11 +67,6 @@ public class ClientForTestReasons implements Client {
     }
 
     @Override
-    public boolean isSameConnectionType(Client other) {
-        return false;
-    }
-
-    @Override
     public boolean isReconnection() {
         return false;
     }

@@ -1,5 +1,8 @@
 package com.company.server;
 
+import com.company.server.requests.ClientConnectionHandler;
+import com.company.server.requests.RequestHandler;
+
 import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
@@ -13,56 +16,25 @@ public class ClientDispatcher extends Thread {
     private final GameIDHolder idHolder;
     private final GameInstanceHandler gameInstanceHandler;
     private final BlockingQueue<Socket> queue;
+    private final RequestHandler requestHandler;
 
     public ClientDispatcher(BlockingQueue<Socket> queue, ThreadPoolExecutor pool) {
         super("ActiveClients");
         this.queue = queue;
         this.pool = pool;
         clients = new WaitingList();
+        requestHandler = new ClientConnectionHandler(clients);
         gameInstanceHandler = GameInstanceHandler.getInstance();
         idHolder = GameIDHolder.getInstance();
     }
 
     private void addClient(Socket client) {
         try {
-            GameClient gamer = new GameClient(client, 500);
-            if (gamer.isReconnection()) {
-                reconnectionStrategy(gamer);
-            } else {
-                connectionStrategy(gamer);
-            }
+            Client gamer = new GameClient(client, 500);
+            requestHandler.handle(gamer);
 
         } catch (IOException | ClassNotFoundException e) {
             System.out.println("[CLIENT] disconnected in time of connection");
-        }
-    }
-
-    protected void reconnectionStrategy(Client gamer) throws IOException {
-        int gameId = gamer.getGameID();
-        if (gameInstanceHandler.hasGame(gameId) && !idHolder.hasSuchID(gameId)) {
-            if ( !clients.push(gamer)) {
-                System.out.println("[deleted] " + gamer);
-//                gamer.send(new Object());  // TODO: 27.03.21 send response packet
-                gamer.close();
-            }
-        } else {
-            System.out.println("[deleted] " + gamer);
-//            gamer.send(new Object());  // TODO: 27.03.21 send response packet
-            gamer.close();
-        }
-    }
-
-    protected void connectionStrategy(Client gamer) throws IOException {
-        int gameId = gamer.getGameID();
-        if (idHolder.hasSuchID(gameId) | gameInstanceHandler.hasGame(gameId)) {
-            System.out.println("[deleted] " + gamer);
-//                gamer.send(new Object());  // TODO: 27.03.21 send response packet
-            gamer.close();
-        } else {
-            if ( ! clients.push(gamer)) {
-                System.out.println("[deleted] " + gamer);
-                gamer.close();
-            }
         }
     }
 

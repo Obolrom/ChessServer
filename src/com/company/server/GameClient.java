@@ -73,11 +73,6 @@ public class GameClient implements Client {
     }
 
     @Override
-    public boolean isSameConnectionType(Client other) {
-        return connectionPacket.type.equals(((GameClient) other).connectionPacket.type);
-    }
-
-    @Override
     public Object receive() throws IOException, ClassNotFoundException {
         return input.readObject();
     }
