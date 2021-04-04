@@ -1,14 +1,6 @@
 package com.company.server;
 
-import com.example.customchess.engine.Game;
-import com.example.customchess.engine.OneDeviceGame;
-
-import javax.swing.*;
-import java.io.*;
-import java.nio.file.Files;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Server {
     public static final String directoryPath =
@@ -42,6 +34,6 @@ public class Server {
         System.out.println("[SERVER] has started [port:" + port +
                 "] [time: " + Calendar.getInstance().getTime() + "]");
 
-        new RequestHandler(port, poolSize).run();
+        new ClientListener(port, poolSize).run();
     }
 }

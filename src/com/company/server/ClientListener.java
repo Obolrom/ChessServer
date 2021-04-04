@@ -5,17 +5,15 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.*;
 
-public class RequestHandler {
-    private final ThreadPoolExecutor pool;
+public class ClientListener {
     private final int PORT;
-    private final ClientDispatcher dispatcher;
     private final BlockingQueue<Socket> blockingQueue;
 
-    public RequestHandler(int port, int maxPoolSize) {
+    public ClientListener(int port, int maxPoolSize) {
         blockingQueue = new LinkedBlockingQueue<>();
         PORT = port;
-        pool = (ThreadPoolExecutor) Executors.newFixedThreadPool(maxPoolSize);
-        dispatcher = new ClientDispatcher(blockingQueue, pool);
+        ThreadPoolExecutor pool = (ThreadPoolExecutor) Executors.newFixedThreadPool(maxPoolSize);
+        ClientDispatcher dispatcher = new ClientDispatcher(blockingQueue, pool);
         dispatcher.start();
     }
 

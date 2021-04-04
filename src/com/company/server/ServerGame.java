@@ -18,6 +18,7 @@ public class ServerGame implements Callable<String> {
     private final Client whitePlayer;
     private final Client blackPlayer;
     private final boolean restored;
+    private boolean isEndOfGame;
 
     public ServerGame(Pair gamers) {
         this(gamers.getAndRemove(), gamers.getAndRemove());
@@ -25,6 +26,7 @@ public class ServerGame implements Callable<String> {
 
     public ServerGame(Client first, Client second) {
         this.GAME_ID = first.getGameID();
+        isEndOfGame = false;
         if (first.isWhitePlayer()) {
             this.whitePlayer = first;
             this.blackPlayer = second;
@@ -47,9 +49,8 @@ public class ServerGame implements Callable<String> {
         }
     }
 
-    public boolean gameLoop() {
+    public void gameLoop() {
         Object packet;
-        boolean isEndOfGame = false;
         Client currentPlayer;
         Client opponentPlayer;
 
@@ -67,8 +68,16 @@ public class ServerGame implements Callable<String> {
         }
 
         while ( ! isEndOfGame ) {
+            CountDownTimer countDownTimer = new CountDownTimer(5 * 60 * 1000) {
+                @Override
+                public void onFinish() {
+                    closeClients();
+                }
+            };
+            countDownTimer.run();
             try {
                 packet = currentPlayer.receive();
+                countDownTimer.cancel();
                 try {
                     processPacket(currentPlayer, opponentPlayer, packet);
 
@@ -84,17 +93,22 @@ public class ServerGame implements Callable<String> {
                 } catch (ChessException ignored) { }
 
             } catch (IOException | ClassNotFoundException e) {
-                closeClients();
-                System.err.println("game [id = " + GAME_ID + "] was broken");
-                game.rollBackLastMove();
-                if (GameInstanceHandler.getInstance().saveGame(GAME_ID, game)) {
-                    System.out.println("Game [id = " + GAME_ID + "] was saved");
-                }
+                endGameWithSavingState();
+                System.out.println("Game state was saved");
+                countDownTimer.cancel();
                 break;
             }
         }
+    }
 
-        return isEndOfGame;
+    private void endGameWithSavingState() {
+        closeClients();
+        System.err.println("game [id = " + GAME_ID + "] was broken");
+        game.rollBackLastMove();
+        if (GameInstanceHandler.getInstance().saveGame(GAME_ID, game)) {
+            System.out.println("Game [id = " + GAME_ID + "] was saved");
+        }
+        isEndOfGame = true;
     }
 
     protected boolean sendResponseAboutGameStart() {
@@ -108,7 +122,7 @@ public class ServerGame implements Callable<String> {
         return false;
     }
 
-    protected void closeClients() {
+    protected synchronized void closeClients() {
         try {
             whitePlayer.close();
             blackPlayer.close();
@@ -122,9 +136,11 @@ public class ServerGame implements Callable<String> {
         if (sendResponseAboutGameStart()) {
             System.out.println("game started successfully");
         }
-        System.out.println("game loop ended [" + gameLoop() + "]");
+        gameLoop();
+        System.out.println("game loop ended [" + isEndOfGame + "]");
         System.out.println("game id " + GAME_ID + " deleted " +
                 GameIDHolder.getInstance().remove(GAME_ID));
+        System.out.println("game " + GAME_ID + " is DONE");
 
         return "done";
     }

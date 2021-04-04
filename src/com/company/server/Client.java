@@ -16,6 +16,5 @@ public interface Client extends Closeable {
     int getGameID();
     ConnectionPacket getConnectionPacket();
     boolean isOpponent(Client other);
-    boolean isSameConnectionType(Client other);
     boolean isReconnection();
 }
