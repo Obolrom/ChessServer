@@ -18,7 +18,6 @@ public class GameClient implements Client {
 
     public GameClient(Socket socket, int timeout) throws IOException, ClassNotFoundException {
         this.socket = socket;
-//        socket.setSoTimeout(timeout);
         input = new ObjectInputStream(socket.getInputStream());
         output = new ObjectOutputStream(socket.getOutputStream());
         connectionPacket = (ConnectionPacket) input.readObject();
@@ -39,7 +38,9 @@ public class GameClient implements Client {
         boolean isActive = true;
         try {
             send(new HeartBeatPacket());
+            socket.setSoTimeout(Server.CLIENT_TIMEOUT);
             receive();
+            socket.setSoTimeout(0);
         } catch (IOException | ClassNotFoundException e) {
             isActive = false;
         }

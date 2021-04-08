@@ -32,7 +32,7 @@ public class ClientListener {
                 }
             }
         } catch (IOException e) {
-            System.err.println("REQUEST CANNOT BE HANDLE");
+            System.err.println("SERVER CANNOT BE STARTED ON PORT " + PORT);
         }
     }
 }

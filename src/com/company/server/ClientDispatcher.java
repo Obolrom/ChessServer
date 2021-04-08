@@ -14,7 +14,6 @@ public class ClientDispatcher extends Thread {
     private final WaitingList clients;
     private final ThreadPoolExecutor pool;
     private final GameIDHolder idHolder;
-    private final GameInstanceHandler gameInstanceHandler;
     private final BlockingQueue<Socket> queue;
     private final RequestHandler requestHandler;
 
@@ -24,7 +23,6 @@ public class ClientDispatcher extends Thread {
         this.pool = pool;
         clients = new WaitingList();
         requestHandler = new ClientConnectionHandler(clients);
-        gameInstanceHandler = GameInstanceHandler.getInstance();
         idHolder = GameIDHolder.getInstance();
     }
 

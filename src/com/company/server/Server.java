@@ -6,6 +6,7 @@ public class Server {
     public static final String directoryPath =
             System.getProperty("user.dir") + "/src/";
     public static final String savedGamesPath = "com/savedgames";
+    public static final int CLIENT_TIMEOUT = 500;
     public static final String usageGuide = "example of usage: <port> [pool size]";
 
     /**  <strong>Server strategy:<p></strong>
